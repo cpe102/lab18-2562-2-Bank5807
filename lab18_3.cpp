@@ -8,7 +8,10 @@
 using namespace std;
 
 struct student{
-	//Define struct student with four member (name ,id , gender, gpa);
+	string name;
+    int id;
+    char gender;
+    float gpa;
 };
 
 struct course{
@@ -18,7 +21,7 @@ struct course{
 	vector<student *> student_list;
 };
 
-student * findstudent(vector<student> allstudents,int key){ //Correct this line
+student *findstudent(vector<student> &allstudents,int key){
 	for(unsigned int i = 0; i < allstudents.size(); i++){
 		if(allstudents[i].id  == key) return &allstudents[i];
 	}
@@ -32,7 +35,7 @@ void printreport(vector<course> allcourses){
 		for(unsigned int j = 0; j < allcourses[i].lecture_list.size();j++){
 			if(j != 0) cout << ", ";
 			cout << allcourses[i].lecture_list[j];
-		} 
+		}
 		cout << "\n\nStudents:\t";
 		for(unsigned int j = 0; j < allcourses[i].student_list.size();j++){
 			if(j != 0) cout << "\t\t";
@@ -40,8 +43,8 @@ void printreport(vector<course> allcourses){
 			cout << allcourses[i].student_list[j]->id << "\t";
 			cout << allcourses[i].student_list[j]->gender << "\t";
 			cout << allcourses[i].student_list[j]->gpa << "\n";
-		} 
-		
+		}
+
 	}
 	cout << "-----------------------------------------------------------------------------\n";
 }
@@ -51,17 +54,17 @@ int main(){
 	ifstream course_file("courses.txt");
 	vector<student> allstudents;
 	vector<course> allcourses;
-	
 	string textline;
-	
+
 	while(getline(student_file,textline)){
-		student s; 
-	
-		//Assign value to the members of struct s;
-	
-		allstudents.push_back(s); 		
+		student s;
+		char name[100];
+		char format[] = "%[^,],%d,%c,%f";
+		sscanf(textline.c_str(),format,name,&s.id,&s.gender,&s.gpa);
+		s.name = name;
+		allstudents.push_back(s);
 	}
-	
+
 	int state = 1;
 	while(getline(course_file,textline)){
 		if(state == 1){
@@ -71,22 +74,22 @@ int main(){
 			c.id = atof(textline.substr(loc+1,5).c_str());
 			getline(course_file,textline);
 			allcourses.push_back(c);
-			state = 2;			
+			state = 2;
 		}else if(state == 2){
 			if(textline == "> Students"){
 				state = 3;
 			}else{
-				//Append lecture_list;
-			}			
+                allcourses[allcourses.size()-1].lecture_list.push_back(textline);
+			}
 		}else{
 			if(textline == "---------------------------------------"){
 				state = 1;
 			}else{
 				student *p = findstudent(allstudents,atof(textline.c_str()));
-				//Append student_list;
+				getline(student_file,textline);
+				allcourses[allcourses.size()-1].student_list.push_back(p);
 			}
 		}
 	}
 	printreport(allcourses);
-	
 }
